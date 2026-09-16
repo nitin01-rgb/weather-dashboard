@@ -1,98 +1,299 @@
-<!DOCTYPE html>
 
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Weather Dashboard</title>
+
+    <meta
+        name="description"
+        content="Live weather conditions and 7-day forecast for cities around the world."
+    >
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="app">
 
-```
+<div class="app-shell">
+
+    <!-- TOP NAVIGATION -->
     <header class="topbar">
-        <div class="brand">
-            <span class="brand-mark">W</span>
-            <div>
-                <h1>Weather</h1>
-                <p>Local conditions & forecast</p>
-            </div>
+
+        <a href="#" class="brand">
+            <span class="brand-icon">W</span>
+
+            <span>
+                <strong>Weather</strong>
+                <small>Live conditions</small>
+            </span>
+        </a>
+
+        <div class="top-actions">
+
+            <button
+                class="location-button"
+                id="locationButton"
+                onclick="getMyLocation()"
+            >
+                <span>⌖</span>
+                My location
+            </button>
+
+            <button
+                class="unit-button"
+                id="unitButton"
+                onclick="toggleUnit()"
+            >
+                °F
+            </button>
+
         </div>
 
-        <div class="status">
-            <span class="status-dot"></span>
-            Live weather
-        </div>
     </header>
+
 
     <main>
 
-        <section class="search-box">
-            <div class="search-input">
-                <span>⌕</span>
-                <input
-                    type="text"
-                    id="cityInput"
-                    placeholder="Search for a city..."
-                    autocomplete="off"
-                >
+        <!-- SEARCH -->
+        <section class="search-section">
+
+            <div class="search-title">
+                <span class="eyebrow">WEATHER SEARCH</span>
+
+                <h1>
+                    Know your weather.
+                    <span>Plan your day.</span>
+                </h1>
+
+                <p>
+                    Search any city to see current conditions,
+                    temperature and the upcoming forecast.
+                </p>
             </div>
-            <button onclick="searchWeather()">Search</button>
+
+
+            <div class="search-wrapper">
+
+                <div class="search-box">
+
+                    <span class="search-icon">⌕</span>
+
+                    <input
+                        type="text"
+                        id="cityInput"
+                        placeholder="Search city, e.g. Jaipur"
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        onclick="searchWeather()"
+                    >
+                        Search
+                    </button>
+
+                </div>
+
+            </div>
+
         </section>
 
+
+        <!-- CURRENT WEATHER -->
         <section class="current-weather">
 
-            <div class="location-info">
-                <p class="label">CURRENT WEATHER</p>
-                <h2 id="cityName">Jaipur</h2>
-                <p id="condition">Clear Sky</p>
+            <div class="current-left">
+
+                <div class="location-label">
+                    <span class="live-dot"></span>
+                    CURRENT CONDITIONS
+                </div>
+
+                <h2 id="cityName">Jaipur, India</h2>
+
+                <p id="condition" class="condition">
+                    Clear Sky
+                </p>
+
+                <div class="current-meta">
+                    <span id="weatherTime">Live data</span>
+                    <span>•</span>
+                    <span>Open-Meteo</span>
+                </div>
+
             </div>
 
-            <div class="main-temperature">
-                <span id="temperature">28°</span>
-                <span class="unit">C</span>
+
+            <div class="temperature-area">
+
+                <span id="weatherIcon" class="large-weather-icon">
+                    ☀️
+                </span>
+
+                <div class="temperature">
+                    <span id="temperature">28°C</span>
+                </div>
+
             </div>
 
         </section>
 
-        <section class="weather-details">
 
-            <div class="weather-card">
-                <div class="card-top">
-                    <span class="detail-icon">Humidity</span>
+        <!-- WEATHER STATS -->
+        <section class="stats-grid">
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+                    <span>Humidity</span>
+                    <span class="stat-symbol">%</span>
                 </div>
-                <p id="humidity">65%</p>
+
+                <strong id="humidity">65%</strong>
+
                 <small>Relative humidity</small>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+                    <span>Wind speed</span>
+                    <span class="stat-symbol">↗</span>
+                </div>
+
+                <strong id="wind">12 km/h</strong>
+
+                <small>Current wind</small>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+                    <span>Feels like</span>
+                    <span class="stat-symbol">°</span>
+                </div>
+
+                <strong id="feels">30°C</strong>
+
+                <small>Apparent temperature</small>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+                    <span>UV index</span>
+                    <span class="stat-symbol">☼</span>
+                </div>
+
+                <strong id="uv">—</strong>
+
+                <small>Maximum today</small>
+
+            </article>
+
+        </section>
+
+
+        <!-- SUN -->
+        <section class="sun-card">
+
+            <div class="sun-item">
+
+                <div class="sun-icon sunrise">
+                    ↑
+                </div>
+
+                <div>
+                    <span>Sunrise</span>
+                    <strong id="sunrise">--:--</strong>
+                </div>
+
             </div>
 
-            <div class="weather-card">
-                <div class="card-top">
-                    <span class="detail-icon">Wind</span>
+
+            <div class="sun-progress">
+
+                <div class="sun-line">
+                    <span></span>
                 </div>
-                <p id="wind">12 km/h</p>
-                <small>Current wind speed</small>
+
+                <div class="sun-labels">
+                    <small>Daylight</small>
+                    <small id="daylightStatus">Today</small>
+                </div>
+
             </div>
 
-            <div class="weather-card">
-                <div class="card-top">
-                    <span class="detail-icon">Feels like</span>
-                </div>
-                <p id="feels">30°C</p>
-                <small>Feels like temperature</small>
-            </div>
 
-            <div class="weather-card">
-                <div class="card-top">
-                    <span class="detail-icon">UV Index</span>
+            <div class="sun-item">
+
+                <div class="sun-icon sunset">
+                    ↓
                 </div>
-                <p id="uv">6</p>
-                <small>UV exposure level</small>
+
+                <div>
+                    <span>Sunset</span>
+                    <strong id="sunset">--:--</strong>
+                </div>
+
             </div>
 
         </section>
 
-        <section class="forecast">
+
+        <!-- FORECAST -->
+        <section class="forecast-section">
+
             <div class="section-heading">
-```
+
+                <div>
+                    <span class="eyebrow">UPCOMING WEATHER</span>
+                    <h2>7-Day Forecast</h2>
+                </div>
+
+                <span class="forecast-note">
+                    High / Low
+                </span>
+
+            </div>
+
+
+            <div
+                class="forecast-container"
+                id="forecastContainer"
+            >
+
+                <!-- Forecast cards generated by JavaScript -->
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <span>Weather Dashboard</span>
+
+        <span>Live weather data</span>
+
+    </footer>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
