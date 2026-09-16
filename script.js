@@ -53,6 +53,7 @@ let currentLocation = {
     latitude: 26.9124,
     longitude: 75.7873,
     country: "India"
+   
 };
 
 let currentWeatherData = null;
@@ -380,12 +381,24 @@ function renderSuggestions(results) {
    LOAD WEATHER
 ========================================================= */
 
-async function loadWeather(
+currentLocation = {
+    name,
     latitude,
     longitude,
-    name,
-    country = ""
-) {
+    country
+};
+
+updateWeatherMap(latitude, longitude, name, country);
+
+updateCurrentWeather(data);
+updateHourly(data);
+updateDaily(data);
+updateSun(data);
+updateDynamicTheme(data);
+updateFavoriteButton();
+addRecentSearch(currentLocation);
+renderRecent();
+renderFavorites();
 
     showLoading();
 
@@ -1797,6 +1810,7 @@ document.addEventListener(
         renderRecent();
 
         renderFavorites();
+        initializeMap();
 
         loadWeather(
             26.9124,
@@ -1817,3 +1831,4 @@ favoriteBtn.addEventListener(
     "click",
     toggleFavorite
 );
+
