@@ -901,3 +901,43 @@ footer {
         font-size: 32px;
     }
 }
+/* Search suggestions */
+.search-box {
+    position: relative;
+    z-index: 1000;
+}
+
+#suggestionBox,
+#suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background: #111c2e;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 9999;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+}
+
+#suggestionBox div,
+.suggestion-item {
+    padding: 13px 16px;
+    color: #dce7f5;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+#suggestionBox div:hover,
+.suggestion-item:hover {
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+.current-weather,
+.weather-details,
+.forecast {
+    position: relative;
+    z-index: 1;
+}
