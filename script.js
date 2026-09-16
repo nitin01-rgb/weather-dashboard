@@ -1,68 +1,54 @@
 let currentUnit = "C";
 let lastWeather = null;
+let lastLocationName = "";
+
+const cityInput = document.getElementById("cityInput");
+const suggestionBox = document.getElementById("suggestionBox");
 
 
-// ======================================
+// ==========================================
 // SEARCH
-// ======================================
+// ==========================================
 
 async function searchWeather() {
 
-    const input = document.getElementById("cityInput");
-
-    if (!input) return;
-
-    const city = input.value.trim();
+    const city = cityInput.value.trim();
 
     if (!city) {
-        alert("Please enter a city name.");
         return;
     }
-
-    hideSuggestions();
 
     await loadWeatherByCity(city);
 }
 
 
-// ======================================
+// ==========================================
 // CITY SEARCH
-// ======================================
+// ==========================================
 
 async function loadWeatherByCity(city) {
 
     try {
-
-        setLoading(true);
 
         const response = await fetch(
             `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
         );
 
         if (!response.ok) {
-            throw new Error("Geocoding request failed");
+            throw new Error("Location search failed");
         }
 
         const data = await response.json();
 
         if (!data.results || data.results.length === 0) {
-
-            alert("City not found.");
-
-            setLoading(false);
-
+            alert("City not found");
             return;
         }
 
         const location = data.results[0];
 
-        const country =
-            location.country
-                ? `, ${location.country}`
-                : "";
-
         const name =
-            `${location.name}${country}`;
+            `${location.name}, ${location.country}`;
 
         await loadWeather(
             location.latitude,
@@ -70,24 +56,21 @@ async function loadWeatherByCity(city) {
             name
         );
 
-        document.getElementById("cityInput").value = "";
+        cityInput.value = "";
+        suggestionBox.innerHTML = "";
 
     } catch (error) {
 
         console.error(error);
 
-        alert("Unable to load weather.");
-
-    } finally {
-
-        setLoading(false);
+        alert("Unable to find this city");
     }
 }
 
 
-// ======================================
+// ==========================================
 // WEATHER API
-// ======================================
+// ==========================================
 
 async function loadWeather(
     latitude,
@@ -102,151 +85,84 @@ async function loadWeather(
         );
 
         if (!response.ok) {
-            throw new Error("Weather API request failed");
+            throw new Error("Weather request failed");
         }
 
         const data = await response.json();
 
         lastWeather = data;
+        lastLocationName = name;
 
         updateCurrentWeather(data, name);
-
         updateForecast(data);
-
         updateSun(data);
 
     } catch (error) {
 
         console.error(error);
 
-        alert("Unable to load weather data.");
+        alert("Unable to load weather");
     }
 }
 
 
-// ======================================
+// ==========================================
 // CURRENT WEATHER
-// ======================================
+// ==========================================
 
 function updateCurrentWeather(data, name) {
 
     const current = data.current;
 
-    const cityName =
-        document.getElementById("cityName");
+    document.getElementById("cityName").textContent =
+        name;
 
-    const condition =
-        document.getElementById("condition");
+    document.getElementById("condition").textContent =
+        getWeatherCondition(
+            current.weather_code
+        );
 
-    const temperature =
-        document.getElementById("temperature");
+    document.getElementById("temperature").textContent =
+        convertTemperature(
+            current.temperature_2m
+        );
 
-    const humidity =
-        document.getElementById("humidity");
+    document.getElementById("humidity").textContent =
+        current.relative_humidity_2m + "%";
 
-    const wind =
-        document.getElementById("wind");
+    document.getElementById("wind").textContent =
+        Math.round(
+            current.wind_speed_10m
+        ) + " km/h";
 
-    const feels =
-        document.getElementById("feels");
+    document.getElementById("feels").textContent =
+        convertTemperature(
+            current.apparent_temperature
+        );
 
-    const uv =
-        document.getElementById("uv");
+    document.getElementById("weatherIcon").textContent =
+        getWeatherIcon(
+            current.weather_code
+        );
 
-    const icon =
-        document.getElementById("weatherIcon");
+    document.getElementById("uv").textContent =
+        data.daily.uv_index_max?.[0] ?? "--";
 
-    const time =
-        document.getElementById("weatherTime");
-
-
-    if (cityName) {
-        cityName.textContent = name;
-    }
-
-
-    if (condition) {
-
-        condition.textContent =
-            getWeatherCondition(
-                current.weather_code
-            );
-    }
-
-
-    if (temperature) {
-
-        temperature.textContent =
-            convertTemperature(
-                current.temperature_2m
-            );
-    }
-
-
-    if (humidity) {
-
-        humidity.textContent =
-            current.relative_humidity_2m + "%";
-    }
-
-
-    if (wind) {
-
-        wind.textContent =
-            Math.round(
-                current.wind_speed_10m
-            ) + " km/h";
-    }
-
-
-    if (feels) {
-
-        feels.textContent =
-            convertTemperature(
-                current.apparent_temperature
-            );
-    }
-
-
-    if (uv && data.daily.uv_index_max) {
-
-        uv.textContent =
-            Math.round(
-                data.daily.uv_index_max[0]
-            );
-    }
-
-
-    if (icon) {
-
-        icon.textContent =
-            getWeatherIcon(
-                current.weather_code
-            );
-    }
-
-
-    if (time && current.time) {
-
-        const date =
-            new Date(current.time);
-
-        time.textContent =
-            "Updated " +
-            date.toLocaleTimeString(
-                [],
-                {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            );
-    }
+    document.getElementById("updatedTime").textContent =
+        new Date().toLocaleTimeString(
+            "en-IN",
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            }
+        );
 }
 
 
-// ======================================
+// ==========================================
 // FORECAST
-// ======================================
+// ==========================================
 
 function updateForecast(data) {
 
@@ -255,20 +171,19 @@ function updateForecast(data) {
             "forecastContainer"
         );
 
-    if (!container || !data.daily) {
-        return;
-    }
-
     container.innerHTML = "";
 
-
-    for (let i = 0; i < 7; i++) {
+    for (
+        let i = 0;
+        i < Math.min(7, data.daily.time.length);
+        i++
+    ) {
 
         const date =
             new Date(
-                data.daily.time[i] + "T12:00:00"
+                data.daily.time[i] +
+                "T12:00:00"
             );
-
 
         const day =
             i === 0
@@ -280,180 +195,122 @@ function updateForecast(data) {
                     }
                 );
 
-
-        const icon =
-            getWeatherIcon(
-                data.daily.weather_code[i]
-            );
-
-
         const high =
             convertTemperature(
                 data.daily.temperature_2m_max[i]
             );
-
 
         const low =
             convertTemperature(
                 data.daily.temperature_2m_min[i]
             );
 
-
         const rain =
-            data.daily
-                .precipitation_probability_max[i]
-            ?? 0;
-
+            data.daily.precipitation_probability_max[i] ?? 0;
 
         const card =
-            document.createElement("article");
+            document.createElement("div");
 
         card.className =
             "forecast-card";
 
-
         card.innerHTML = `
-            <div class="forecast-day">
-                ${day}
-            </div>
+            <p>${day}</p>
 
             <span class="forecast-icon">
-                ${icon}
+                ${getWeatherIcon(
+                    data.daily.weather_code[i]
+                )}
             </span>
 
             <h3>${high}</h3>
 
             <small>${low}</small>
 
-            <div class="rain-chance">
-                ${rain}% rain
-            </div>
+            <p class="rain-chance">
+                Rain ${rain}%
+            </p>
         `;
-
 
         container.appendChild(card);
     }
 }
 
 
-// ======================================
+// ==========================================
 // SUNRISE / SUNSET
-// ======================================
+// ==========================================
 
 function updateSun(data) {
 
-    if (!data.daily) return;
-
-
     const sunrise =
-        document.getElementById("sunrise");
+        data.daily.sunrise?.[0];
 
     const sunset =
-        document.getElementById("sunset");
+        data.daily.sunset?.[0];
 
-
-    if (sunrise && data.daily.sunrise) {
-
-        sunrise.textContent =
-            formatTime(
-                data.daily.sunrise[0]
-            );
+    if (!sunrise || !sunset) {
+        return;
     }
 
+    document.getElementById("sunrise").textContent =
+        formatTime(sunrise);
 
-    if (sunset && data.daily.sunset) {
+    document.getElementById("sunset").textContent =
+        formatTime(sunset);
 
-        sunset.textContent =
-            formatTime(
-                data.daily.sunset[0]
-            );
-    }
+    const sunriseDate =
+        new Date(sunrise);
 
+    const sunsetDate =
+        new Date(sunset);
 
-    const daylight =
-        document.getElementById(
-            "daylightStatus"
-        );
+    const duration =
+        (sunsetDate - sunriseDate)
+        / (1000 * 60 * 60);
 
-
-    if (
-        daylight &&
-        data.daily.sunrise &&
-        data.daily.sunset
-    ) {
-
-        const start =
-            new Date(
-                data.daily.sunrise[0]
-            );
-
-        const end =
-            new Date(
-                data.daily.sunset[0]
-            );
-
-        const hours =
-            (
-                (end - start)
-                / 1000
-                / 60
-                / 60
-            ).toFixed(1);
-
-        daylight.textContent =
-            `${hours}h daylight`;
-    }
+    document.getElementById(
+        "daylightDuration"
+    ).textContent =
+        duration.toFixed(1) + "h daylight";
 }
 
 
 function formatTime(value) {
 
-    const date =
-        new Date(value);
-
-    return date.toLocaleTimeString(
-        [],
+    return new Date(value).toLocaleTimeString(
+        "en-IN",
         {
             hour: "2-digit",
-            minute: "2-digit"
+            minute: "2-digit",
+            hour12: false
         }
     );
 }
 
 
-// ======================================
+// ==========================================
 // TEMPERATURE
-// ======================================
+// ==========================================
 
 function convertTemperature(temp) {
-
-    if (
-        temp === null ||
-        temp === undefined
-    ) {
-        return "—";
-    }
-
 
     if (currentUnit === "F") {
 
         return (
             Math.round(
-                temp * 9 / 5 + 32
+                (temp * 9 / 5) + 32
             ) + "°F"
         );
     }
 
-
-    return (
-        Math.round(temp) + "°C"
-    );
+    return Math.round(temp) + "°C";
 }
 
 
-// ======================================
-// C / F TOGGLE
-// ======================================
+// ==========================================
+// °C / °F
+// ==========================================
 
 function toggleUnit() {
 
@@ -462,14 +319,11 @@ function toggleUnit() {
             ? "F"
             : "C";
 
-
     if (lastWeather) {
 
         updateCurrentWeather(
             lastWeather,
-            document
-                .getElementById("cityName")
-                .textContent
+            lastLocationName
         );
 
         updateForecast(
@@ -477,378 +331,271 @@ function toggleUnit() {
         );
     }
 
-
-    const button =
-        document.getElementById(
-            "unitButton"
-        );
-
-
-    if (button) {
-
-        button.textContent =
-            currentUnit === "C"
-                ? "°F"
-                : "°C";
-    }
+    document.getElementById(
+        "unitButton"
+    ).textContent =
+        currentUnit === "C"
+            ? "°F"
+            : "°C";
 }
 
 
-// ======================================
-// WEATHER ICON
-// ======================================
+// ==========================================
+// WEATHER ICONS
+// ==========================================
 
 function getWeatherIcon(code) {
 
-    if (code === 0)
+    if (code === 0) {
         return "☀️";
+    }
 
-    if (code <= 3)
+    if (code <= 3) {
         return "🌤️";
+    }
 
-    if (code <= 48)
+    if (code <= 48) {
         return "🌫️";
+    }
 
-    if (code <= 67)
+    if (code <= 67) {
         return "🌧️";
+    }
 
-    if (code <= 77)
+    if (code <= 77) {
         return "❄️";
+    }
 
-    if (code <= 82)
+    if (code <= 82) {
         return "🌦️";
+    }
 
-    if (code <= 99)
+    if (code <= 99) {
         return "⛈️";
+    }
 
     return "🌡️";
 }
 
 
-// ======================================
-// WEATHER CONDITION
-// ======================================
+// ==========================================
+// CONDITIONS
+// ==========================================
 
 function getWeatherCondition(code) {
 
-    if (code === 0)
+    if (code === 0) {
         return "Clear sky";
+    }
 
-    if (code === 1)
-        return "Mainly clear";
-
-    if (code === 2)
+    if (code <= 3) {
         return "Partly cloudy";
+    }
 
-    if (code === 3)
-        return "Overcast";
-
-    if (code <= 48)
+    if (code <= 48) {
         return "Foggy";
+    }
 
-    if (code <= 55)
-        return "Drizzle";
+    if (code <= 67) {
+        return "Rainy";
+    }
 
-    if (code <= 67)
-        return "Rain";
+    if (code <= 77) {
+        return "Snowy";
+    }
 
-    if (code <= 77)
-        return "Snow";
-
-    if (code <= 82)
+    if (code <= 82) {
         return "Rain showers";
+    }
 
-    if (code <= 99)
+    if (code <= 99) {
         return "Thunderstorm";
+    }
 
     return "Unknown";
 }
 
 
-// ======================================
+// ==========================================
 // MY LOCATION
-// ======================================
+// ==========================================
 
 function getMyLocation() {
 
     if (!navigator.geolocation) {
 
         alert(
-            "Location is not supported by your browser."
+            "Geolocation is not supported"
         );
 
         return;
     }
 
-
-    const button =
-        document.getElementById(
-            "locationButton"
-        );
-
-
-    if (button) {
-
-        button.classList.add(
-            "loading"
-        );
-    }
-
-
     navigator.geolocation.getCurrentPosition(
 
         async function(position) {
 
-            const {
-                latitude,
-                longitude
-            } = position.coords;
+            const latitude =
+                position.coords.latitude;
 
+            const longitude =
+                position.coords.longitude;
 
             await loadWeather(
                 latitude,
                 longitude,
                 "My Location"
             );
-
-
-            if (button) {
-
-                button.classList.remove(
-                    "loading"
-                );
-            }
         },
 
-
-        function(error) {
-
-            console.error(error);
+        function() {
 
             alert(
-                "Location permission was denied."
+                "Location permission was denied"
             );
-
-
-            if (button) {
-
-                button.classList.remove(
-                    "loading"
-                );
-            }
         }
     );
 }
 
 
-// ======================================
+// ==========================================
+// INDIAN CITY AUTOCOMPLETE
+// ==========================================
+
+const popularCities = [
+
+    "Delhi",
+    "Mumbai",
+    "Bangalore",
+    "Hyderabad",
+    "Chennai",
+    "Kolkata",
+    "Pune",
+    "Ahmedabad",
+    "Jaipur",
+    "Lucknow",
+    "Chandigarh",
+    "Indore",
+    "Bhopal",
+    "Patna",
+    "Agra",
+    "Udaipur",
+    "Jodhpur",
+    "Surat",
+    "Nagpur",
+    "Kanpur",
+    "Varanasi",
+    "Amritsar",
+    "Noida",
+    "Gurgaon",
+    "Ghaziabad",
+    "Dehradun",
+    "Ranchi",
+    "Raipur",
+    "Vadodara",
+    "Nashik",
+    "Kochi",
+    "Coimbatore",
+    "Mysore",
+    "Visakhapatnam",
+    "Thiruvananthapuram"
+];
+
+
+// ==========================================
 // AUTOCOMPLETE
-// ======================================
+// ==========================================
 
-const cityInput =
-    document.getElementById(
-        "cityInput"
-    );
+cityInput.addEventListener(
+    "input",
+    function() {
+
+        const query =
+            this.value
+                .trim()
+                .toLowerCase();
+
+        suggestionBox.innerHTML = "";
+
+        if (query.length < 2) {
+            return;
+        }
+
+        const matches =
+            popularCities.filter(city =>
+                city.toLowerCase()
+                    .startsWith(query)
+            );
+
+        matches.forEach(city => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "suggestion-item";
+
+            item.textContent =
+                city + ", India";
+
+            item.addEventListener(
+                "click",
+                function() {
+
+                    cityInput.value =
+                        city;
+
+                    suggestionBox.innerHTML =
+                        "";
+
+                    searchWeather();
+                }
+            );
+
+            suggestionBox.appendChild(
+                item
+            );
+        });
+    }
+);
 
 
-let suggestionBox = null;
+// ==========================================
+// ENTER SEARCH
+// ==========================================
 
+cityInput.addEventListener(
+    "keydown",
+    function(event) {
 
-if (cityInput) {
+        if (event.key === "Enter") {
 
-    suggestionBox =
-        document.createElement("div");
-
-    suggestionBox.id =
-        "suggestionBox";
-
-
-    cityInput.parentElement.appendChild(
-        suggestionBox
-    );
-
-
-    cityInput.addEventListener(
-        "input",
-        async function() {
-
-            const query =
-                this.value.trim();
-
+            event.preventDefault();
 
             suggestionBox.innerHTML =
                 "";
 
-
-            if (query.length < 2) {
-                return;
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=7&language=en&format=json&countryCode=IN`
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    !data.results ||
-                    !data.results.length
-                ) {
-                    return;
-                }
-
-
-                data.results.forEach(
-                    city => {
-
-                        const item =
-                            document.createElement(
-                                "div"
-                            );
-
-
-                        item.className =
-                            "suggestion-item";
-
-
-                        const state =
-                            city.admin1
-                                ? `, ${city.admin1}`
-                                : "";
-
-
-                        item.textContent =
-                            `${city.name}${state}`;
-
-
-                        item.addEventListener(
-                            "click",
-                            function() {
-
-                                cityInput.value =
-                                    city.name;
-
-                                hideSuggestions();
-
-                                searchWeather();
-                            }
-                        );
-
-
-                        suggestionBox.appendChild(
-                            item
-                        );
-                    }
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Autocomplete error:",
-                    error
-                );
-            }
+            searchWeather();
         }
-    );
-
-
-    cityInput.addEventListener(
-        "keydown",
-        function(event) {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                event.preventDefault();
-
-                searchWeather();
-            }
-        }
-    );
-}
-
-
-// ======================================
-// HIDE SUGGESTIONS
-// ======================================
-
-function hideSuggestions() {
-
-    if (suggestionBox) {
-
-        suggestionBox.innerHTML =
-            "";
     }
-}
+);
 
+
+// ==========================================
+// CLOSE SUGGESTIONS
+// ==========================================
 
 document.addEventListener(
     "click",
     function(event) {
 
         if (
-            cityInput &&
-            suggestionBox &&
-            !cityInput.parentElement.contains(
-                event.target
-            )
+            !cityInput.parentElement
+                .contains(event.target)
         ) {
 
-            hideSuggestions();
+            suggestionBox.innerHTML =
+                "";
         }
     }
-);
-
-
-// ======================================
-// LOADING STATE
-// ======================================
-
-function setLoading(isLoading) {
-
-    const searchButton =
-        document.querySelector(
-            ".search-box button"
-        );
-
-
-    if (!searchButton) return;
-
-
-    if (isLoading) {
-
-        searchButton.textContent =
-            "Loading...";
-
-        searchButton.disabled =
-            true;
-
-    } else {
-
-        searchButton.textContent =
-            "Search";
-
-        searchButton.disabled =
-            false;
-    }
-}
-
-
-// ======================================
-// INITIAL WEATHER
-// ======================================
-
-loadWeather(
-    26.9124,
-    75.7873,
-    "Jaipur, India"
 );
