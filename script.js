@@ -3,6 +3,35 @@
    Weather Dashboard powered by Open-Meteo
 ========================================================= */
 
+// =========================
+// WEATHER MAP
+// =========================
+
+let weatherMap;
+let weatherMarker;
+
+function initializeMap() {
+    weatherMap = L.map("weatherMap").setView(
+        [26.9124, 75.7873],
+        5
+    );
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 19,
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(weatherMap);
+
+    weatherMarker = L.marker(
+        [26.9124, 75.7873]
+    )
+        .addTo(weatherMap)
+        .bindPopup("VGU Campus, Jaipur")
+        .openPopup();
+}
+
 
 /* =========================================================
    CONFIG
