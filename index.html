@@ -1,15 +1,14 @@
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Weather Dashboard</title>
+    <title>Weatherly — Live Weather Dashboard</title>
 
     <meta
         name="description"
-        content="Live weather conditions and 7-day forecast for cities around the world."
+        content="Live weather conditions, forecast, wind, humidity and sunrise information."
     >
 
     <link rel="stylesheet" href="style.css">
@@ -17,63 +16,55 @@
 
 <body>
 
-<div class="app-shell">
+    <div class="background-glow glow-one"></div>
+    <div class="background-glow glow-two"></div>
 
-    <!-- TOP NAVIGATION -->
     <header class="topbar">
 
         <a href="#" class="brand">
             <span class="brand-icon">W</span>
-
-            <span>
-                <strong>Weather</strong>
-                <small>Live conditions</small>
-            </span>
+            <span>Weatherly</span>
         </a>
 
-        <div class="top-actions">
+        <nav>
+            <a href="#weather">Weather</a>
+            <a href="#forecast">Forecast</a>
+        </nav>
 
-            <button
-                class="location-button"
-                id="locationButton"
-                onclick="getMyLocation()"
-            >
-                <span>⌖</span>
-                My location
+        <div class="top-actions">
+            <button id="locationButton" onclick="getMyLocation()">
+                ⌖ My location
             </button>
 
-            <button
-                class="unit-button"
-                id="unitButton"
-                onclick="toggleUnit()"
-            >
+            <button id="unitButton" onclick="toggleUnit()">
                 °F
             </button>
-
         </div>
 
     </header>
 
 
-    <main>
+    <main id="weather" class="container">
 
-        <!-- SEARCH -->
-        <section class="search-section">
+        <!-- HERO -->
 
-            <div class="search-title">
-                <span class="eyebrow">WEATHER SEARCH</span>
+        <section class="hero">
 
-                <h1>
-                    Know your weather.
-                    <span>Plan your day.</span>
-                </h1>
-
-                <p>
-                    Search any city to see current conditions,
-                    temperature and the upcoming forecast.
-                </p>
+            <div class="eyebrow">
+                <span class="live-dot"></span>
+                LIVE WEATHER
             </div>
 
+            <h1>
+                Know your weather.
+                <span>Plan your day.</span>
+            </h1>
+
+            <p>
+                Current conditions and forecasts for cities around the world.
+            </p>
+
+            <!-- SEARCH -->
 
             <div class="search-wrapper">
 
@@ -84,18 +75,17 @@
                     <input
                         type="text"
                         id="cityInput"
-                        placeholder="Search city, e.g. Jaipur"
+                        placeholder="Search for a city..."
                         autocomplete="off"
                     >
 
-                    <button
-                        type="button"
-                        onclick="searchWeather()"
-                    >
+                    <button onclick="searchWeather()">
                         Search
                     </button>
 
                 </div>
+
+                <div id="suggestionBox" class="suggestion-box"></div>
 
             </div>
 
@@ -103,39 +93,46 @@
 
 
         <!-- CURRENT WEATHER -->
-        <section class="current-weather">
+
+        <section class="current-card">
 
             <div class="current-left">
 
-                <div class="location-label">
-                    <span class="live-dot"></span>
+                <div class="section-label">
                     CURRENT CONDITIONS
                 </div>
 
-                <h2 id="cityName">Jaipur, India</h2>
+                <h2 id="cityName">
+                    Jaipur, India
+                </h2>
 
-                <p id="condition" class="condition">
-                    Clear Sky
+                <p id="condition">
+                    Loading weather...
                 </p>
 
-                <div class="current-meta">
-                    <span id="weatherTime">Live data</span>
+                <div class="updated">
+                    Updated <span id="updatedTime">--:--</span>
                     <span>•</span>
-                    <span>Open-Meteo</span>
+                    Open-Meteo
                 </div>
 
             </div>
 
 
-            <div class="temperature-area">
+            <div class="current-center">
 
-                <span id="weatherIcon" class="large-weather-icon">
+                <div id="weatherIcon" class="main-weather-icon">
                     ☀️
-                </span>
-
-                <div class="temperature">
-                    <span id="temperature">28°C</span>
                 </div>
+
+            </div>
+
+
+            <div class="temperature-box">
+
+                <span id="temperature">
+                    --°C
+                </span>
 
             </div>
 
@@ -143,106 +140,130 @@
 
 
         <!-- WEATHER STATS -->
+
         <section class="stats-grid">
 
-            <article class="stat-card">
+            <div class="stat-card">
 
-                <div class="stat-header">
+                <div class="stat-top">
                     <span>Humidity</span>
                     <span class="stat-symbol">%</span>
                 </div>
 
-                <strong id="humidity">65%</strong>
+                <strong id="humidity">
+                    --%
+                </strong>
 
-                <small>Relative humidity</small>
+                <small>
+                    Relative humidity
+                </small>
 
-            </article>
+            </div>
 
 
-            <article class="stat-card">
+            <div class="stat-card">
 
-                <div class="stat-header">
+                <div class="stat-top">
                     <span>Wind speed</span>
                     <span class="stat-symbol">↗</span>
                 </div>
 
-                <strong id="wind">12 km/h</strong>
+                <strong id="wind">
+                    -- km/h
+                </strong>
 
-                <small>Current wind</small>
+                <small>
+                    Current wind
+                </small>
 
-            </article>
+            </div>
 
 
-            <article class="stat-card">
+            <div class="stat-card">
 
-                <div class="stat-header">
+                <div class="stat-top">
                     <span>Feels like</span>
                     <span class="stat-symbol">°</span>
                 </div>
 
-                <strong id="feels">30°C</strong>
+                <strong id="feels">
+                    --°C
+                </strong>
 
-                <small>Apparent temperature</small>
+                <small>
+                    Apparent temperature
+                </small>
 
-            </article>
+            </div>
 
 
-            <article class="stat-card">
+            <div class="stat-card">
 
-                <div class="stat-header">
+                <div class="stat-top">
                     <span>UV index</span>
                     <span class="stat-symbol">☼</span>
                 </div>
 
-                <strong id="uv">—</strong>
+                <strong id="uv">
+                    --
+                </strong>
 
-                <small>Maximum today</small>
+                <small>
+                    Maximum today
+                </small>
 
-            </article>
+            </div>
 
         </section>
 
 
         <!-- SUN -->
+
         <section class="sun-card">
 
-            <div class="sun-item">
+            <div class="sun-side">
 
-                <div class="sun-icon sunrise">
+                <div class="sun-circle">
                     ↑
                 </div>
 
                 <div>
-                    <span>Sunrise</span>
-                    <strong id="sunrise">--:--</strong>
+                    <small>Sunrise</small>
+                    <strong id="sunrise">
+                        --:--
+                    </strong>
                 </div>
 
             </div>
 
 
-            <div class="sun-progress">
+            <div class="daylight">
 
-                <div class="sun-line">
+                <div class="daylight-line">
                     <span></span>
                 </div>
 
-                <div class="sun-labels">
-                    <small>Daylight</small>
-                    <small id="daylightStatus">Today</small>
+                <div class="daylight-labels">
+                    <span>Daylight</span>
+                    <span id="daylightDuration">
+                        -- daylight
+                    </span>
                 </div>
 
             </div>
 
 
-            <div class="sun-item">
+            <div class="sun-side sunset">
 
-                <div class="sun-icon sunset">
+                <div class="sun-circle">
                     ↓
                 </div>
 
                 <div>
-                    <span>Sunset</span>
-                    <strong id="sunset">--:--</strong>
+                    <small>Sunset</small>
+                    <strong id="sunset">
+                        --:--
+                    </strong>
                 </div>
 
             </div>
@@ -251,13 +272,19 @@
 
 
         <!-- FORECAST -->
-        <section class="forecast-section">
+
+        <section id="forecast" class="forecast-section">
 
             <div class="section-heading">
 
                 <div>
-                    <span class="eyebrow">UPCOMING WEATHER</span>
-                    <h2>7-Day Forecast</h2>
+                    <span class="section-label">
+                        UPCOMING WEATHER
+                    </span>
+
+                    <h2>
+                        7-Day Forecast
+                    </h2>
                 </div>
 
                 <span class="forecast-note">
@@ -268,32 +295,22 @@
 
 
             <div
-                class="forecast-container"
                 id="forecastContainer"
-            >
-
-                <!-- Forecast cards generated by JavaScript -->
-
-            </div>
+                class="forecast-container"
+            ></div>
 
         </section>
 
     </main>
 
 
-    <!-- FOOTER -->
     <footer>
-
-        <span>Weather Dashboard</span>
-
-        <span>Live weather data</span>
-
+        <span>Weatherly</span>
+        <span>Live weather dashboard</span>
     </footer>
 
-</div>
 
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 
 </body>
 </html>
