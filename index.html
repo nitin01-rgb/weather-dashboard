@@ -4,11 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Weatherly — Live Weather Dashboard</title>
+    <title>VGU Weather — Campus Weather Dashboard</title>
 
     <meta
         name="description"
-        content="Live weather conditions, forecast, wind, humidity and sunrise information."
+        content="VGU Weather — Weather and forecast dashboard powered by Open-Meteo."
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
     >
 
     <link rel="stylesheet" href="style.css">
@@ -16,131 +24,162 @@
 
 <body>
 
-    <div class="background-glow glow-one"></div>
-    <div class="background-glow glow-two"></div>
+<div class="app-shell">
 
+    <!-- NAVBAR -->
     <header class="topbar">
 
-        <a href="#" class="brand">
-            <span class="brand-icon">W</span>
-            <span>Weatherly</span>
-        </a>
+        <div class="brand">
+            <div class="brand-mark">V</div>
 
-        <nav>
-            <a href="#weather">Weather</a>
-            <a href="#forecast">Forecast</a>
-        </nav>
+            <div>
+                <div class="brand-name">VGU Weather</div>
+                <div class="brand-subtitle">
+                    Campus Weather Dashboard
+                </div>
+            </div>
+        </div>
 
-        <div class="top-actions">
-            <button id="locationButton" onclick="getMyLocation()">
-                ⌖ My location
+        <div class="nav-actions">
+
+            <button id="unitToggle" class="nav-btn">
+                °C
             </button>
 
-            <button id="unitButton" onclick="toggleUnit()">
-                °F
+            <button id="locationBtn" class="nav-btn location-btn">
+                <span>⌖</span>
+                My Location
             </button>
+
         </div>
 
     </header>
 
 
-    <main id="weather" class="container">
+    <!-- SEARCH -->
+    <section class="search-section">
 
-        <!-- HERO -->
+        <div class="search-box">
 
-        <section class="hero">
+            <span class="search-icon">⌕</span>
 
-            <div class="eyebrow">
-                <span class="live-dot"></span>
-                LIVE WEATHER
+            <input
+                type="text"
+                id="cityInput"
+                placeholder="Search city or campus location..."
+                autocomplete="off"
+            >
+
+            <button id="searchBtn">
+                Search
+            </button>
+
+            <div id="suggestions" class="suggestions"></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RECENT + FAVORITES -->
+    <section class="quick-section">
+
+        <div class="quick-block">
+
+            <div class="quick-title">
+                Recent Searches
+                <button id="clearRecentBtn" class="clear-btn">
+                    Clear
+                </button>
             </div>
 
-            <h1>
-                Know your weather.
-                <span>Plan your day.</span>
-            </h1>
-
-            <p>
-                Current conditions and forecasts for cities around the world.
-            </p>
-
-            <!-- SEARCH -->
-
-            <div class="search-wrapper">
-
-                <div class="search-box">
-
-                    <span class="search-icon">⌕</span>
-
-                    <input
-                        type="text"
-                        id="cityInput"
-                        placeholder="Search for a city..."
-                        autocomplete="off"
-                    >
-
-                    <button onclick="searchWeather()">
-                        Search
-                    </button>
-
-                </div>
-
-                <div id="suggestionBox" class="suggestion-box"></div>
-
+            <div id="recentList" class="quick-list">
+                <span class="empty-text">
+                    Your recent searches will appear here.
+                </span>
             </div>
 
-        </section>
+        </div>
 
+
+        <div class="quick-block">
+
+            <div class="quick-title">
+                Favorite Locations
+            </div>
+
+            <div id="favoritesList" class="quick-list">
+                <span class="empty-text">
+                    Add locations using the ☆ button.
+                </span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- MAIN WEATHER -->
+    <main>
 
         <!-- CURRENT WEATHER -->
-
         <section class="current-card">
 
             <div class="current-left">
 
-                <div class="section-label">
+                <div class="eyebrow">
                     CURRENT CONDITIONS
                 </div>
 
-                <h2 id="cityName">
-                    Jaipur, India
-                </h2>
+                <div class="location-row">
 
-                <p id="condition">
-                    Loading weather...
-                </p>
+                    <div>
+                        <h1 id="locationName">
+                            VGU Campus, Jaipur
+                        </h1>
 
-                <div class="updated">
-                    Updated <span id="updatedTime">--:--</span>
-                    <span>•</span>
-                    Open-Meteo
+                        <p id="conditionText">
+                            Loading weather...
+                        </p>
+
+                        <div class="updated">
+                            Updated <span id="updatedTime">--:--</span>
+                            <span>•</span>
+                            Open-Meteo
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
 
 
-            <div class="current-center">
-
-                <div id="weatherIcon" class="main-weather-icon">
-                    ☀️
-                </div>
-
+            <div class="current-icon" id="currentIcon">
+                ☀️
             </div>
 
 
-            <div class="temperature-box">
+            <div class="current-temperature">
 
-                <span id="temperature">
-                    --°C
-                </span>
+                <button
+                    id="favoriteBtn"
+                    class="favorite-btn"
+                    title="Add to favorites"
+                >
+                    ☆
+                </button>
+
+                <div>
+                    <span id="currentTemp">--</span><span class="degree">°</span>
+                    <span id="currentUnit">C</span>
+                </div>
 
             </div>
 
         </section>
 
 
-        <!-- WEATHER STATS -->
-
+        <!-- STAT CARDS -->
         <section class="stats-grid">
 
             <div class="stat-card">
@@ -168,8 +207,8 @@
                     <span class="stat-symbol">↗</span>
                 </div>
 
-                <strong id="wind">
-                    -- km/h
+                <strong>
+                    <span id="windSpeed">--</span> km/h
                 </strong>
 
                 <small>
@@ -186,8 +225,9 @@
                     <span class="stat-symbol">°</span>
                 </div>
 
-                <strong id="feels">
-                    --°C
+                <strong>
+                    <span id="feelsLike">--</span>°
+                    <span id="feelsUnit">C</span>
                 </strong>
 
                 <small>
@@ -204,7 +244,7 @@
                     <span class="stat-symbol">☼</span>
                 </div>
 
-                <strong id="uv">
+                <strong id="uvIndex">
                     --
                 </strong>
 
@@ -217,18 +257,17 @@
         </section>
 
 
-        <!-- SUN -->
-
+        <!-- SUNRISE SUNSET -->
         <section class="sun-card">
 
             <div class="sun-side">
 
-                <div class="sun-circle">
+                <div class="sun-icon sunrise">
                     ↑
                 </div>
 
                 <div>
-                    <small>Sunrise</small>
+                    <span>Sunrise</span>
                     <strong id="sunrise">
                         --:--
                     </strong>
@@ -237,13 +276,18 @@
             </div>
 
 
-            <div class="daylight">
+            <div class="sun-progress">
 
-                <div class="daylight-line">
-                    <span></span>
+                <div class="sun-line">
+
+                    <div
+                        id="sunPosition"
+                        class="sun-dot"
+                    ></div>
+
                 </div>
 
-                <div class="daylight-labels">
+                <div class="sun-labels">
                     <span>Daylight</span>
                     <span id="daylightDuration">
                         -- daylight
@@ -253,14 +297,14 @@
             </div>
 
 
-            <div class="sun-side sunset">
+            <div class="sun-side sunset-side">
 
-                <div class="sun-circle">
+                <div class="sun-icon sunset">
                     ↓
                 </div>
 
                 <div>
-                    <small>Sunset</small>
+                    <span>Sunset</span>
                     <strong id="sunset">
                         --:--
                     </strong>
@@ -271,23 +315,56 @@
         </section>
 
 
-        <!-- FORECAST -->
-
-        <section id="forecast" class="forecast-section">
+        <!-- HOURLY -->
+        <section class="forecast-section">
 
             <div class="section-heading">
 
                 <div>
-                    <span class="section-label">
+                    <div class="eyebrow">
+                        HOURLY CONDITIONS
+                    </div>
+
+                    <h2>
+                        Next 24 Hours
+                    </h2>
+                </div>
+
+                <span class="section-note">
+                    Temperature & rain probability
+                </span>
+
+            </div>
+
+
+            <div
+                id="hourlyForecast"
+                class="hourly-container"
+            >
+                <div class="loading">
+                    Loading hourly forecast...
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- 7 DAY -->
+        <section class="forecast-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <div class="eyebrow">
                         UPCOMING WEATHER
-                    </span>
+                    </div>
 
                     <h2>
                         7-Day Forecast
                     </h2>
                 </div>
 
-                <span class="forecast-note">
+                <span class="section-note">
                     High / Low
                 </span>
 
@@ -295,22 +372,39 @@
 
 
             <div
-                id="forecastContainer"
-                class="forecast-container"
-            ></div>
+                id="dailyForecast"
+                class="daily-grid"
+            >
+                <div class="loading">
+                    Loading forecast...
+                </div>
+            </div>
 
         </section>
 
     </main>
 
 
-    <footer>
-        <span>Weatherly</span>
-        <span>Live weather dashboard</span>
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <div>
+            VGU Weather
+        </div>
+
+        <div>
+            Weather data provided by Open-Meteo
+        </div>
+
     </footer>
 
+</div>
 
-    <script src="script.js"></script>
+
+<div id="toast" class="toast"></div>
+
+
+<script src="script.js"></script>
 
 </body>
 </html>
