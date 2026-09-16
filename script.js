@@ -216,3 +216,47 @@ document.getElementById("cityInput").addEventListener("keydown", function(event)
         searchWeather();
     }
 });
+
+// India city autocomplete suggestions
+const cityInput = document.getElementById("cityInput");
+
+let suggestionBox = document.createElement("div");
+suggestionBox.id = "suggestionBox";
+cityInput.parentElement.style.position = "relative";
+cityInput.parentElement.appendChild(suggestionBox);
+
+cityInput.addEventListener("input", async function () {
+    const query = this.value.trim();
+
+    suggestionBox.innerHTML = "";
+
+    if (query.length < 3) return;
+
+    try {
+        const response = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=en&format=json&countryCode=IN`
+        );
+
+        const data = await response.json();
+
+        if (!data.results) return;
+
+        data.results.forEach(city => {
+            const item = document.createElement("div");
+
+            item.textContent =
+                `${city.name}${city.admin1 ? ", " + city.admin1 : ""}`;
+
+            item.onclick = function () {
+                cityInput.value = city.name;
+                suggestionBox.innerHTML = "";
+                searchWeather();
+            };
+
+            suggestionBox.appendChild(item);
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+});
