@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app">
+
+        <header>
+            <h1>🌤️ Weather Dashboard</h1>
+            <p>Check the weather anywhere in the world</p>
+        </header>
+
+        <section class="search-box">
+            <input type="text" id="cityInput" placeholder="Enter city name...">
+            <button onclick="searchWeather()">Search</button>
+        </section>
+
+        <main>
+            <section class="current-weather">
+                <div>
+                    <h2 id="cityName">Jaipur</h2>
+                    <p id="condition">Clear Sky</p>
+                </div>
+
+                <div class="temperature">
+                    <span id="temperature">28°</span>C
+                </div>
+            </section>
+
+            <section class="weather-details">
+
+                <div class="weather-card">
+                    <span>💧</span>
+                    <h3>Humidity</h3>
+                    <p id="humidity">65%</p>
+                </div>
+
+                <div class="weather-card">
+                    <span>💨</span>
+                    <h3>Wind Speed</h3>
+                    <p id="wind">12 km/h</p>
+                </div>
+
+                <div class="weather-card">
+                    <span>🌡️</span>
+                    <h3>Feels Like</h3>
+                    <p id="feels">30°C</p>
+                </div>
+
+                <div class="weather-card">
+                    <span>☀️</span>
+                    <h3>UV Index</h3>
+                    <p id="uv">6</p>
+                </div>
+
+            </section>
+
+            <section class="forecast">
+                <h2>7-Day Forecast</h2>
+
+                <div class="forecast-container">
+
+                    <div class="forecast-card">
+                        <p>Today</p>
+                        <span>☀️</span>
+                        <h3>32°C</h3>
+                        <small>24°C</small>
+                    </div>
+
+                    <div class="forecast-card">
+                        <p>Tomorrow</p>
+                        <span>🌤️</span>
+                        <h3>31°C</h3>
+                        <small>23°C</small>
+                    </div>
+
+                    <div class="forecast-card">
+                        <p>Wed</p>
+                        <span>☁️</span>
+                        <h3>29°C</h3>
+                        <small>22°C</small>
+                    </div>
+
+                    <div class="forecast-card">
+                        <p>Thu</p>
+                        <span>🌧️</span>
+                        <h3>27°C</h3>
+                        <small>21°C</small>
+                    </div>
+
+                    <div class="forecast-card">
+                        <p>Fri</p>
+                        <span>🌦️</span>
+                        <h3>28°C</h3>
+                        <small>22°C</small>
+                    </div>
+
+                    <div class="forecast-card">
+                        <p>Sat</p>
+                        <span>☀️</span>
+                        <h3>30°C</h3>
+                        <small>23°C</small>
+                    </div>
+
+                    <div class="forecast-card">
+                        <p>Sun</p>
+                        <span>☀️</span>
+                        <h3>33°C</h3>
+                        <small>25°C</small>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Weather Dashboard • Rapid Website Building</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
