@@ -3,14 +3,32 @@
    Weather Dashboard powered by Open-Meteo
 ========================================================= */
 
-// =========================
-// WEATHER MAP
-// =========================
+/* =========================================================
+   CONFIG
+========================================================= */
 
-let weatherMap;
-let weatherMarker;
+const API_BASE = "https://api.open-meteo.com/v1/forecast";
+const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
+
+const RECENT_KEY = "vguWeatherRecent";
+const FAVORITES_KEY = "vguWeatherFavorites";
+
+
+/* =========================================================
+   WEATHER MAP
+========================================================= */
+
+let weatherMap = null;
+let weatherMarker = null;
 
 function initializeMap() {
+    const mapElement = document.getElementById("weatherMap");
+
+    if (!mapElement || typeof L === "undefined") {
+        console.warn("Leaflet map could not be initialized.");
+        return;
+    }
+
     weatherMap = L.map("weatherMap").setView(
         [26.9124, 75.7873],
         5
@@ -33,15 +51,36 @@ function initializeMap() {
 }
 
 
-/* =========================================================
-   CONFIG
-========================================================= */
+function updateWeatherMap(
+    latitude,
+    longitude,
+    name,
+    country = ""
+) {
+    if (!weatherMap || !weatherMarker) {
+        return;
+    }
 
-const API_BASE = "https://api.open-meteo.com/v1/forecast";
-const GEO_API = "https://geocoding-api.open-meteo.com/v1/search";
+    const locationText =
+        `${name}${country ? ", " + country : ""}`;
 
-const RECENT_KEY = "vguWeatherRecent";
-const FAVORITES_KEY = "vguWeatherFavorites";
+    weatherMarker.setLatLng([
+        latitude,
+        longitude
+    ]);
+
+    weatherMarker
+        .setPopupContent(locationText)
+        .openPopup();
+
+    weatherMap.flyTo(
+        [latitude, longitude],
+        10,
+        {
+            duration: 1.2
+        }
+    );
+}
 
 
 /* =========================================================
@@ -53,66 +92,106 @@ let currentLocation = {
     latitude: 26.9124,
     longitude: 75.7873,
     country: "India"
-   
 };
 
 let currentWeatherData = null;
 
-let unit = localStorage.getItem("vguWeatherUnit") || "C";
+let unit =
+    localStorage.getItem("vguWeatherUnit") || "C";
 
 
 /* =========================================================
    DOM
 ========================================================= */
 
-const cityInput = document.getElementById("cityInput");
-const searchBtn = document.getElementById("searchBtn");
-const suggestions = document.getElementById("suggestions");
+const cityInput =
+    document.getElementById("cityInput");
 
-const locationBtn = document.getElementById("locationBtn");
-const unitToggle = document.getElementById("unitToggle");
+const searchBtn =
+    document.getElementById("searchBtn");
 
-const favoriteBtn = document.getElementById("favoriteBtn");
+const suggestions =
+    document.getElementById("suggestions");
 
-const locationName = document.getElementById("locationName");
-const conditionText = document.getElementById("conditionText");
-const currentIcon = document.getElementById("currentIcon");
+const locationBtn =
+    document.getElementById("locationBtn");
 
-const currentTemp = document.getElementById("currentTemp");
-const currentUnit = document.getElementById("currentUnit");
+const unitToggle =
+    document.getElementById("unitToggle");
 
-const humidity = document.getElementById("humidity");
-const windSpeed = document.getElementById("windSpeed");
-const feelsLike = document.getElementById("feelsLike");
-const feelsUnit = document.getElementById("feelsUnit");
-const uvIndex = document.getElementById("uvIndex");
+const favoriteBtn =
+    document.getElementById("favoriteBtn");
 
-const sunrise = document.getElementById("sunrise");
-const sunset = document.getElementById("sunset");
-const sunPosition = document.getElementById("sunPosition");
-const daylightDuration = document.getElementById("daylightDuration");
+const locationName =
+    document.getElementById("locationName");
 
-const updatedTime = document.getElementById("updatedTime");
+const conditionText =
+    document.getElementById("conditionText");
 
-const hourlyForecast = document.getElementById("hourlyForecast");
-const dailyForecast = document.getElementById("dailyForecast");
+const currentIcon =
+    document.getElementById("currentIcon");
 
-const recentList = document.getElementById("recentList");
-const favoritesList = document.getElementById("favoritesList");
+const currentTemp =
+    document.getElementById("currentTemp");
 
-const clearRecentBtn = document.getElementById("clearRecentBtn");
+const currentUnit =
+    document.getElementById("currentUnit");
 
-const toast = document.getElementById("toast");
+const humidity =
+    document.getElementById("humidity");
+
+const windSpeed =
+    document.getElementById("windSpeed");
+
+const feelsLike =
+    document.getElementById("feelsLike");
+
+const feelsUnit =
+    document.getElementById("feelsUnit");
+
+const uvIndex =
+    document.getElementById("uvIndex");
+
+const sunrise =
+    document.getElementById("sunrise");
+
+const sunset =
+    document.getElementById("sunset");
+
+const sunPosition =
+    document.getElementById("sunPosition");
+
+const daylightDuration =
+    document.getElementById("daylightDuration");
+
+const updatedTime =
+    document.getElementById("updatedTime");
+
+const hourlyForecast =
+    document.getElementById("hourlyForecast");
+
+const dailyForecast =
+    document.getElementById("dailyForecast");
+
+const recentList =
+    document.getElementById("recentList");
+
+const favoritesList =
+    document.getElementById("favoritesList");
+
+const clearRecentBtn =
+    document.getElementById("clearRecentBtn");
+
+const toast =
+    document.getElementById("toast");
 
 
 /* =========================================================
-   WEATHER CODE
+   WEATHER INFORMATION
 ========================================================= */
 
 function getWeatherInfo(code) {
-
     const weather = {
-
         0: {
             text: "Clear sky",
             icon: "☀️",
@@ -238,7 +317,6 @@ function getWeatherInfo(code) {
             icon: "⛈️",
             theme: "storm"
         }
-
     };
 
     return weather[code] || {
@@ -254,16 +332,15 @@ function getWeatherInfo(code) {
 ========================================================= */
 
 async function searchCity(query) {
-
     if (!query || query.trim().length < 2) {
         suggestions.style.display = "none";
         return;
     }
 
     try {
-
         const url =
-            `${GEO_API}?name=${encodeURIComponent(query)}&count=6&language=en&format=json`;
+            `${GEO_API}?name=${encodeURIComponent(query)}` +
+            `&count=6&language=en&format=json`;
 
         const response = await fetch(url);
 
@@ -276,10 +353,8 @@ async function searchCity(query) {
         renderSuggestions(data.results || []);
 
     } catch (error) {
-
-        suggestions.style.display = "none";
-
         console.error(error);
+        suggestions.style.display = "none";
     }
 }
 
@@ -289,9 +364,7 @@ async function searchCity(query) {
 ========================================================= */
 
 function renderSuggestions(results) {
-
     if (!results.length) {
-
         suggestions.innerHTML = `
             <div class="suggestion-item">
                 <span class="suggestion-city">
@@ -301,77 +374,77 @@ function renderSuggestions(results) {
         `;
 
         suggestions.style.display = "block";
-
         return;
     }
 
+    suggestions.innerHTML = results.map(
+        (place, index) => {
 
-    suggestions.innerHTML = results.map((place, index) => {
+            const city =
+                place.name || "Unknown";
 
-        const city =
-            place.name || "Unknown";
+            const country =
+                place.country || "";
 
-        const country =
-            place.country || "";
+            const admin =
+                place.admin1 || "";
 
-        const admin =
-            place.admin1 || "";
+            return `
+                <div
+                    class="suggestion-item"
+                    data-index="${index}"
+                >
+                    <div>
+                        <div class="suggestion-city">
+                            ${escapeHtml(city)}
+                        </div>
 
-        return `
-            <div
-                class="suggestion-item"
-                data-index="${index}"
-            >
-                <div>
-                    <div class="suggestion-city">
-                        ${escapeHtml(city)}
+                        <div class="suggestion-country">
+                            ${escapeHtml(admin)}
+                            ${admin && country ? ", " : ""}
+                            ${escapeHtml(country)}
+                        </div>
                     </div>
 
-                    <div class="suggestion-country">
-                        ${escapeHtml(admin)}
-                        ${admin && country ? ", " : ""}
-                        ${escapeHtml(country)}
-                    </div>
+                    <span>→</span>
                 </div>
-
-                <span>→</span>
-            </div>
-        `;
-
-    }).join("");
-
+            `;
+        }
+    ).join("");
 
     suggestions
         .querySelectorAll(".suggestion-item")
         .forEach(item => {
 
-            item.addEventListener("click", () => {
+            item.addEventListener(
+                "click",
+                () => {
 
-                const index =
-                    Number(item.dataset.index);
+                    const index =
+                        Number(item.dataset.index);
 
-                const place = results[index];
+                    const place =
+                        results[index];
 
-                if (place) {
+                    if (!place) {
+                        return;
+                    }
 
-                    const name =
+                    cityInput.value =
                         place.name;
+
+                    suggestions.style.display =
+                        "none";
 
                     loadWeather(
                         place.latitude,
                         place.longitude,
-                        name,
+                        place.name,
                         place.country || ""
                     );
-
-                    cityInput.value = name;
-
-                    suggestions.style.display = "none";
                 }
-            });
-
+            );
         });
-
 
     suggestions.style.display = "block";
 }
@@ -381,35 +454,29 @@ function renderSuggestions(results) {
    LOAD WEATHER
 ========================================================= */
 
-currentLocation = {
-    name,
+async function loadWeather(
     latitude,
     longitude,
-    country
-};
-
-updateWeatherMap(latitude, longitude, name, country);
-
-updateCurrentWeather(data);
-updateHourly(data);
-updateDaily(data);
-updateSun(data);
-updateDynamicTheme(data);
-updateFavoriteButton();
-addRecentSearch(currentLocation);
-renderRecent();
-renderFavorites();
-
+    name,
+    country = ""
+) {
     showLoading();
 
     try {
-
         const url =
             `${API_BASE}?latitude=${latitude}` +
             `&longitude=${longitude}` +
-            `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m` +
-            `&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m` +
-            `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max` +
+            `&current=` +
+            `temperature_2m,relative_humidity_2m,` +
+            `apparent_temperature,weather_code,wind_speed_10m` +
+            `&hourly=` +
+            `temperature_2m,relative_humidity_2m,` +
+            `apparent_temperature,precipitation_probability,` +
+            `weather_code,wind_speed_10m` +
+            `&daily=` +
+            `weather_code,temperature_2m_max,` +
+            `temperature_2m_min,precipitation_probability_max,` +
+            `sunrise,sunset,uv_index_max` +
             `&forecast_days=7` +
             `&timezone=auto`;
 
@@ -417,13 +484,16 @@ renderFavorites();
             await fetch(url);
 
         if (!response.ok) {
-            throw new Error("Weather request failed");
+            throw new Error(
+                "Weather request failed"
+            );
         }
 
         const data =
             await response.json();
 
-        currentWeatherData = data;
+        currentWeatherData =
+            data;
 
         currentLocation = {
             name,
@@ -432,6 +502,13 @@ renderFavorites();
             country
         };
 
+        /* MAP UPDATE */
+        updateWeatherMap(
+            latitude,
+            longitude,
+            name,
+            country
+        );
 
         updateCurrentWeather(data);
 
@@ -445,7 +522,9 @@ renderFavorites();
 
         updateFavoriteButton();
 
-        addRecentSearch(currentLocation);
+        addRecentSearch(
+            currentLocation
+        );
 
         renderRecent();
 
@@ -469,27 +548,27 @@ renderFavorites();
 ========================================================= */
 
 function updateCurrentWeather(data) {
-
     const current =
         data.current;
 
     const info =
-        getWeatherInfo(current.weather_code);
-
+        getWeatherInfo(
+            current.weather_code
+        );
 
     locationName.textContent =
         currentLocation.name +
-        (currentLocation.name.includes("VGU")
-            ? ""
-            : `, ${currentLocation.country || ""}`);
-
+        (
+            currentLocation.name.includes("VGU")
+                ? ""
+                : `, ${currentLocation.country || ""}`
+        );
 
     conditionText.textContent =
         info.text;
 
     currentIcon.textContent =
         info.icon;
-
 
     const temp =
         convertTemperature(
@@ -501,28 +580,27 @@ function updateCurrentWeather(data) {
             current.apparent_temperature
         );
 
-
     currentTemp.textContent =
         Math.round(temp);
 
     feelsLike.textContent =
         Math.round(feels);
 
-
     currentUnit.textContent =
-        unit;
+        `°${unit}`;
 
     feelsUnit.textContent =
-        unit;
-
+        `°${unit}`;
 
     humidity.textContent =
-        `${Math.round(current.relative_humidity_2m)}%`;
-
+        `${Math.round(
+            current.relative_humidity_2m
+        )}%`;
 
     windSpeed.textContent =
-        Math.round(current.wind_speed_10m);
-
+        Math.round(
+            current.wind_speed_10m
+        );
 
     const uv =
         data.daily.uv_index_max[0];
@@ -531,7 +609,6 @@ function updateCurrentWeather(data) {
         uv !== undefined
             ? Number(uv).toFixed(1)
             : "--";
-
 
     updatedTime.textContent =
         formatTime(
@@ -545,7 +622,6 @@ function updateCurrentWeather(data) {
 ========================================================= */
 
 function updateHourly(data) {
-
     const times =
         data.hourly.time;
 
@@ -558,18 +634,15 @@ function updateHourly(data) {
     const codes =
         data.hourly.weather_code;
 
-
     let startIndex =
         findCurrentHourIndex(
             times,
             data.current.time
         );
 
-
     if (startIndex < 0) {
         startIndex = 0;
     }
-
 
     const endIndex =
         Math.min(
@@ -577,16 +650,13 @@ function updateHourly(data) {
             times.length
         );
 
-
     let html = "";
-
 
     for (
         let i = startIndex;
         i < endIndex;
         i++
     ) {
-
         const info =
             getWeatherInfo(
                 codes[i]
@@ -595,12 +665,13 @@ function updateHourly(data) {
         const isNow =
             i === startIndex;
 
-
         html += `
             <div class="hourly-card ${isNow ? "active" : ""}">
 
                 <div class="hourly-time">
-                    ${isNow ? "Now" : formatHour(times[i])}
+                    ${isNow
+                        ? "Now"
+                        : formatHour(times[i])}
                 </div>
 
                 <div class="hourly-icon">
@@ -623,18 +694,16 @@ function updateHourly(data) {
         `;
     }
 
-
     hourlyForecast.innerHTML =
         html;
 }
 
 
 /* =========================================================
-   DAILY FORECAST
+   7 DAY FORECAST
 ========================================================= */
 
 function updateDaily(data) {
-
     const days =
         data.daily.time;
 
@@ -650,27 +719,22 @@ function updateDaily(data) {
     const codes =
         data.daily.weather_code;
 
-
     let html = "";
-
 
     for (
         let i = 0;
         i < days.length;
         i++
     ) {
-
         const info =
             getWeatherInfo(
                 codes[i]
             );
 
-
         const dayName =
             i === 0
                 ? "Today"
                 : formatDay(days[i]);
-
 
         const high =
             Math.round(
@@ -685,7 +749,6 @@ function updateDaily(data) {
                     min[i]
                 )
             );
-
 
         html += `
             <div class="daily-card">
@@ -714,7 +777,6 @@ function updateDaily(data) {
         `;
     }
 
-
     dailyForecast.innerHTML =
         html;
 }
@@ -725,13 +787,11 @@ function updateDaily(data) {
 ========================================================= */
 
 function updateSun(data) {
-
     const sunriseTime =
         data.daily.sunrise[0];
 
     const sunsetTime =
         data.daily.sunset[0];
-
 
     sunrise.textContent =
         formatTime(
@@ -743,7 +803,6 @@ function updateSun(data) {
             sunsetTime
         );
 
-
     const duration =
         calculateDaylight(
             sunriseTime,
@@ -752,7 +811,6 @@ function updateSun(data) {
 
     daylightDuration.textContent =
         `${duration} daylight`;
-
 
     updateSunPosition(
         data.current.time,
@@ -771,7 +829,6 @@ function updateSunPosition(
     sunriseTime,
     sunsetTime
 ) {
-
     const currentMinutes =
         timeToMinutes(current);
 
@@ -781,13 +838,20 @@ function updateSunPosition(
     const sunsetMinutes =
         timeToMinutes(sunsetTime);
 
+    const total =
+        sunsetMinutes -
+        sunriseMinutes;
 
-    let percentage =
-        (
-            (currentMinutes - sunriseMinutes) /
-            (sunsetMinutes - sunriseMinutes)
-        ) * 100;
+    let percentage = 0;
 
+    if (total > 0) {
+        percentage =
+            (
+                (currentMinutes -
+                    sunriseMinutes) /
+                total
+            ) * 100;
+    }
 
     percentage =
         Math.max(
@@ -798,18 +862,18 @@ function updateSunPosition(
             )
         );
 
-
-    sunPosition.style.left =
-        `${percentage}%`;
+    if (sunPosition) {
+        sunPosition.style.left =
+            `${percentage}%`;
+    }
 }
 
 
 /* =========================================================
-   DAY / NIGHT + WEATHER BACKGROUND
+   DYNAMIC THEME
 ========================================================= */
 
 function updateDynamicTheme(data) {
-
     const current =
         data.current;
 
@@ -819,17 +883,14 @@ function updateDynamicTheme(data) {
     const sunsetTime =
         data.daily.sunset[0];
 
-
     const isDay =
         current.time >= sunriseTime &&
         current.time <= sunsetTime;
-
 
     const info =
         getWeatherInfo(
             current.weather_code
         );
-
 
     document.body.classList.remove(
         "day-theme",
@@ -839,26 +900,19 @@ function updateDynamicTheme(data) {
         "storm-theme"
     );
 
-
-    if (
-        info.theme === "rain"
-    ) {
+    if (info.theme === "rain") {
 
         document.body.classList.add(
             "rain-theme"
         );
 
-    } else if (
-        info.theme === "storm"
-    ) {
+    } else if (info.theme === "storm") {
 
         document.body.classList.add(
             "storm-theme"
         );
 
-    } else if (
-        info.theme === "clear"
-    ) {
+    } else if (info.theme === "clear") {
 
         document.body.classList.add(
             "clear-theme"
@@ -880,24 +934,19 @@ function updateDynamicTheme(data) {
 ========================================================= */
 
 function getRecent() {
-
     try {
-
         return JSON.parse(
             localStorage.getItem(
                 RECENT_KEY
             )
         ) || [];
-
     } catch {
-
         return [];
     }
 }
 
 
 function addRecentSearch(location) {
-
     if (
         !location ||
         !location.name
@@ -905,20 +954,15 @@ function addRecentSearch(location) {
         return;
     }
 
-
     let recent =
         getRecent();
-
 
     recent =
         recent.filter(
             item =>
-                !(
-                    item.name.toLowerCase() ===
-                    location.name.toLowerCase()
-                )
+                item.name.toLowerCase() !==
+                location.name.toLowerCase()
         );
-
 
     recent.unshift({
         name: location.name,
@@ -927,10 +971,8 @@ function addRecentSearch(location) {
         country: location.country
     });
 
-
     recent =
         recent.slice(0, 6);
-
 
     localStorage.setItem(
         RECENT_KEY,
@@ -940,10 +982,8 @@ function addRecentSearch(location) {
 
 
 function renderRecent() {
-
     const recent =
         getRecent();
-
 
     if (!recent.length) {
 
@@ -955,7 +995,6 @@ function renderRecent() {
 
         return;
     }
-
 
     recentList.innerHTML =
         recent.map(
@@ -972,7 +1011,6 @@ function renderRecent() {
             `
         ).join("");
 
-
     recentList
         .querySelectorAll(".quick-chip")
         .forEach(button => {
@@ -982,15 +1020,17 @@ function renderRecent() {
                 () => {
 
                     loadWeather(
-                        Number(button.dataset.lat),
-                        Number(button.dataset.lon),
+                        Number(
+                            button.dataset.lat
+                        ),
+                        Number(
+                            button.dataset.lon
+                        ),
                         button.dataset.name,
                         button.dataset.country
                     );
-
                 }
             );
-
         });
 }
 
@@ -1000,32 +1040,25 @@ function renderRecent() {
 ========================================================= */
 
 function getFavorites() {
-
     try {
-
         return JSON.parse(
             localStorage.getItem(
                 FAVORITES_KEY
             )
         ) || [];
-
     } catch {
-
         return [];
     }
 }
 
 
 function toggleFavorite() {
-
     if (!currentLocation) {
         return;
     }
 
-
     let favorites =
         getFavorites();
-
 
     const exists =
         favorites.some(
@@ -1035,7 +1068,6 @@ function toggleFavorite() {
                 item.longitude ===
                     currentLocation.longitude
         );
-
 
     if (exists) {
 
@@ -1068,12 +1100,10 @@ function toggleFavorite() {
         );
     }
 
-
     localStorage.setItem(
         FAVORITES_KEY,
         JSON.stringify(favorites)
     );
-
 
     updateFavoriteButton();
 
@@ -1082,10 +1112,12 @@ function toggleFavorite() {
 
 
 function updateFavoriteButton() {
+    if (!favoriteBtn) {
+        return;
+    }
 
     const favorites =
         getFavorites();
-
 
     const exists =
         favorites.some(
@@ -1096,12 +1128,10 @@ function updateFavoriteButton() {
                     currentLocation.longitude
         );
 
-
     favoriteBtn.textContent =
         exists
             ? "★"
             : "☆";
-
 
     favoriteBtn.title =
         exists
@@ -1111,10 +1141,8 @@ function updateFavoriteButton() {
 
 
 function renderFavorites() {
-
     const favorites =
         getFavorites();
-
 
     if (!favorites.length) {
 
@@ -1126,7 +1154,6 @@ function renderFavorites() {
 
         return;
     }
-
 
     favoritesList.innerHTML =
         favorites.map(
@@ -1143,7 +1170,6 @@ function renderFavorites() {
             `
         ).join("");
 
-
     favoritesList
         .querySelectorAll(".quick-chip")
         .forEach(button => {
@@ -1153,16 +1179,47 @@ function renderFavorites() {
                 () => {
 
                     loadWeather(
-                        Number(button.dataset.lat),
-                        Number(button.dataset.lon),
+                        Number(
+                            button.dataset.lat
+                        ),
+                        Number(
+                            button.dataset.lon
+                        ),
                         button.dataset.name,
                         button.dataset.country
                     );
-
                 }
             );
-
         });
+}
+
+
+/* =========================================================
+   UNIT CONVERSION
+========================================================= */
+
+function convertTemperature(
+    celsius
+) {
+    if (unit === "F") {
+        return (
+            celsius * 9 / 5
+        ) + 32;
+    }
+
+    return celsius;
+}
+
+
+function updateUnitButton() {
+    if (!unitToggle) {
+        return;
+    }
+
+    unitToggle.textContent =
+        unit === "C"
+            ? "°C"
+            : "°F";
 }
 
 
@@ -1188,32 +1245,8 @@ clearRecentBtn.addEventListener(
 
 
 /* =========================================================
-   UNIT CONVERSION
+   UNIT TOGGLE
 ========================================================= */
-
-function convertTemperature(
-    celsius
-) {
-
-    if (unit === "F") {
-
-        return (
-            celsius * 9 / 5
-        ) + 32;
-    }
-
-    return celsius;
-}
-
-
-function updateUnitButton() {
-
-    unitToggle.textContent =
-        unit === "C"
-            ? "°C"
-            : "°F";
-}
-
 
 unitToggle.addEventListener(
     "click",
@@ -1224,15 +1257,12 @@ unitToggle.addEventListener(
                 ? "F"
                 : "C";
 
-
         localStorage.setItem(
             "vguWeatherUnit",
             unit
         );
 
-
         updateUnitButton();
-
 
         if (currentWeatherData) {
 
@@ -1269,11 +1299,9 @@ locationBtn.addEventListener(
             return;
         }
 
-
         showToast(
             "Getting your location..."
         );
-
 
         navigator.geolocation.getCurrentPosition(
 
@@ -1284,7 +1312,6 @@ locationBtn.addEventListener(
 
                 const lon =
                     position.coords.longitude;
-
 
                 loadWeather(
                     lat,
@@ -1333,18 +1360,23 @@ searchBtn.addEventListener(
             return;
         }
 
-
         try {
 
             const url =
-                `${GEO_API}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+                `${GEO_API}?name=${encodeURIComponent(query)}` +
+                `&count=1&language=en&format=json`;
 
             const response =
                 await fetch(url);
 
+            if (!response.ok) {
+                throw new Error(
+                    "Search request failed"
+                );
+            }
+
             const data =
                 await response.json();
-
 
             if (
                 !data.results ||
@@ -1358,10 +1390,14 @@ searchBtn.addEventListener(
                 return;
             }
 
-
             const place =
                 data.results[0];
 
+            cityInput.value =
+                place.name;
+
+            suggestions.style.display =
+                "none";
 
             loadWeather(
                 place.latitude,
@@ -1369,10 +1405,6 @@ searchBtn.addEventListener(
                 place.name,
                 place.country || ""
             );
-
-
-            suggestions.style.display =
-                "none";
 
         } catch (error) {
 
@@ -1394,9 +1426,7 @@ cityInput.addEventListener(
     "keydown",
     event => {
 
-        if (
-            event.key === "Enter"
-        ) {
+        if (event.key === "Enter") {
 
             event.preventDefault();
 
@@ -1407,7 +1437,7 @@ cityInput.addEventListener(
 
 
 /* =========================================================
-   LIVE SUGGESTIONS
+   LIVE SEARCH SUGGESTIONS
 ========================================================= */
 
 let searchTimer;
@@ -1419,7 +1449,6 @@ cityInput.addEventListener(
         clearTimeout(
             searchTimer
         );
-
 
         searchTimer =
             setTimeout(
@@ -1465,15 +1494,12 @@ function findCurrentHourIndex(
     times,
     currentTime
 ) {
-
     if (!currentTime) {
         return 0;
     }
 
-
     const currentHour =
         currentTime.slice(0, 13);
-
 
     const exact =
         times.findIndex(
@@ -1482,17 +1508,12 @@ function findCurrentHourIndex(
                 currentHour
         );
 
-
     if (exact >= 0) {
         return exact;
     }
 
-
     let closest = 0;
-
-    let smallest =
-        Infinity;
-
+    let smallest = Infinity;
 
     times.forEach(
         (time, index) => {
@@ -1502,7 +1523,6 @@ function findCurrentHourIndex(
                     new Date(time) -
                     new Date(currentTime)
                 );
-
 
             if (
                 difference <
@@ -1518,15 +1538,11 @@ function findCurrentHourIndex(
         }
     );
 
-
     return closest;
 }
 
 
-function formatHour(
-    iso
-) {
-
+function formatHour(iso) {
     const time =
         iso.slice(11, 16);
 
@@ -1538,30 +1554,23 @@ function formatHour(
     const minute =
         time.slice(3, 5);
 
-
     const suffix =
         hour >= 12
             ? "PM"
             : "AM";
 
-
     hour =
         hour % 12 || 12;
-
 
     return `${hour}:${minute} ${suffix}`;
 }
 
 
-function formatTime(
-    iso
-) {
-
+function formatTime(iso) {
     if (!iso) {
         return "--:--";
     }
 
-
     const time =
         iso.slice(11, 16);
 
@@ -1573,30 +1582,23 @@ function formatTime(
     const minute =
         time.slice(3, 5);
 
-
     const suffix =
         hour >= 12
             ? "PM"
             : "AM";
 
-
     hour =
         hour % 12 || 12;
-
 
     return `${hour}:${minute} ${suffix}`;
 }
 
 
-function formatDay(
-    dateString
-) {
-
+function formatDay(dateString) {
     const date =
         new Date(
             `${dateString}T12:00:00`
         );
-
 
     return date.toLocaleDateString(
         "en-US",
@@ -1607,18 +1609,13 @@ function formatDay(
 }
 
 
-function timeToMinutes(
-    iso
-) {
-
+function timeToMinutes(iso) {
     if (!iso) {
         return 0;
     }
 
-
     const time =
         iso.slice(11, 16);
-
 
     const hour =
         Number(
@@ -1629,7 +1626,6 @@ function timeToMinutes(
         Number(
             time.slice(3, 5)
         );
-
 
     return (
         hour * 60 +
@@ -1642,23 +1638,19 @@ function calculateDaylight(
     start,
     end
 ) {
-
     const startMinutes =
         timeToMinutes(start);
 
     const endMinutes =
         timeToMinutes(end);
 
-
     let difference =
         endMinutes -
         startMinutes;
 
-
     if (difference < 0) {
         difference += 1440;
     }
-
 
     const hours =
         Math.floor(
@@ -1668,13 +1660,12 @@ function calculateDaylight(
     const minutes =
         difference % 60;
 
-
     return `${hours}h ${minutes}m`;
 }
 
 
 /* =========================================================
-   LOADING / ERROR
+   LOADING
 ========================================================= */
 
 function showLoading() {
@@ -1700,6 +1691,12 @@ function showLoading() {
     uvIndex.textContent =
         "--";
 
+    sunrise.textContent =
+        "--:--";
+
+    sunset.textContent =
+        "--:--";
+
     hourlyForecast.innerHTML = `
         <div class="loading">
             Loading hourly forecast...
@@ -1713,6 +1710,10 @@ function showLoading() {
     `;
 }
 
+
+/* =========================================================
+   ERROR
+========================================================= */
 
 function showError() {
 
@@ -1739,9 +1740,7 @@ function showError() {
 
 let toastTimer;
 
-function showToast(
-    message
-) {
+function showToast(message) {
 
     toast.textContent =
         message;
@@ -1750,11 +1749,9 @@ function showToast(
         "show"
     );
 
-
     clearTimeout(
         toastTimer
     );
-
 
     toastTimer =
         setTimeout(
@@ -1771,12 +1768,10 @@ function showToast(
 
 
 /* =========================================================
-   SECURITY / HTML ESCAPING
+   SECURITY
 ========================================================= */
 
-function escapeHtml(
-    value
-) {
+function escapeHtml(value) {
 
     return String(value)
         .replaceAll("&", "&amp;")
@@ -1787,13 +1782,9 @@ function escapeHtml(
 }
 
 
-function escapeAttribute(
-    value
-) {
+function escapeAttribute(value) {
 
-    return escapeHtml(
-        value
-    );
+    return escapeHtml(value);
 }
 
 
@@ -1810,6 +1801,12 @@ document.addEventListener(
         renderRecent();
 
         renderFavorites();
+
+        /*
+           IMPORTANT:
+           Map initialize hone ke baad
+           loadWeather call hoga.
+        */
         initializeMap();
 
         loadWeather(
@@ -1818,7 +1815,6 @@ document.addEventListener(
             "VGU Campus, Jaipur",
             "India"
         );
-
     }
 );
 
@@ -1831,4 +1827,3 @@ favoriteBtn.addEventListener(
     "click",
     toggleFavorite
 );
-
